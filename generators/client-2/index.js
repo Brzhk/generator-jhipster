@@ -276,20 +276,21 @@ module.exports = JhipsterClientGenerator.extend({
     writing: {
 
         writeCommonFiles: function () {
-
             this.template('_package.json', 'package.json', this, {});
             this.template('_bower.json', 'bower.json', this, {});
             this.template('_tsconfig.json', 'tsconfig.json', this, {});
             this.template('typings.json', 'typings.json', this, {});
-            this.template('bowerrc', '.bowerrc', this, {});
+            this.template('_bowerrc', '.bowerrc', this, {});
             this.template('_eslintrc.json', '.eslintrc.json', this, {});
             this.template('_eslintignore', '.eslintignore', this, {});
-            this.template('gulpfile.js', 'gulpfile.js', this, {});
-            this.fs.copy(this.templatePath('gulp/handleErrors.js'), this.destinationPath('gulp/handleErrors.js')); // to avoid interpolate errors
-            this.template('gulp/utils.js', 'gulp/utils.js', this, {});
-            this.template('gulp/serve.js', 'gulp/serve.js', this, {});
-            this.template('gulp/config.js', 'gulp/config.js', this, {});
-            this.template('gulp/build.js', 'gulp/build.js', this, {});
+            this.template('_gulpfile.js', 'gulpfile.js', this, {});
+            this.fs.copy(this.templatePath('gulp/_handleErrors.js'), this.destinationPath('gulp/handleErrors.js')); // to avoid interpolate errors
+            this.template('gulp/_utils.js', 'gulp/utils.js', this, {});
+            this.template('gulp/_serve.js', 'gulp/serve.js', this, {});
+            this.template('gulp/_config.js', 'gulp/config.js', this, {});
+            this.template('gulp/_build.js', 'gulp/build.js', this, {});
+            this.template('gulp/_copy.js', 'gulp/copy.js', this, {});
+            this.template('gulp/_inject.js', 'gulp/inject.js', this, {});
         },
 
         writeCssFiles: function () {
@@ -325,6 +326,7 @@ module.exports = JhipsterClientGenerator.extend({
             this.copy(MAIN_SRC_DIR + 'system.config.js', MAIN_SRC_DIR + 'system.config.js');
 
             // Angular JS module
+            this.template(ANGULAR_DIR + '_upgrade_adapter.ts', ANGULAR_DIR + 'upgrade_adapter.ts', this, {});
             this.template(ANGULAR_DIR + '_app.main.ts', ANGULAR_DIR + 'app.main.ts', this, {});
             this.template(ANGULAR_DIR + '_app.module.ts', ANGULAR_DIR + 'app.module.ts', this, {});
             this.template(ANGULAR_DIR + '_app.state.ts', ANGULAR_DIR + 'app.state.ts', this, {});
@@ -471,10 +473,10 @@ module.exports = JhipsterClientGenerator.extend({
             this.copyJs(ANGULAR_DIR + 'components/login/_login.service.ts', ANGULAR_DIR + 'components/login/login.service.ts', this, {});
             this.template(ANGULAR_DIR + 'components/login/_login.controller.ts', ANGULAR_DIR + 'components/login/login.controller.ts', this, {});
             this.template(ANGULAR_DIR + 'components/util/_base64.service.ts', ANGULAR_DIR + 'components/util/base64.service.ts', this, {});
-            this.template(ANGULAR_DIR + 'components/util/_capitalize.filter.ts', ANGULAR_DIR + 'components/util/capitalize.filter.ts', this, {});
+            this.template(ANGULAR_DIR + 'components/util/_capitalize.pipe.ts', ANGULAR_DIR + 'components/util/capitalize.pipe.ts', this, {});
             this.template(ANGULAR_DIR + 'components/util/_parse-links.service.ts', ANGULAR_DIR + 'components/util/parse-links.service.ts', this, {});
-            this.template(ANGULAR_DIR + 'components/util/_truncate-characters.filter.ts', ANGULAR_DIR + 'components/util/truncate-characters.filter.ts', this, {});
-            this.template(ANGULAR_DIR + 'components/util/_truncate-words.filter.ts', ANGULAR_DIR + 'components/util/truncate-words.filter.ts', this, {});
+            this.template(ANGULAR_DIR + 'components/util/_truncate-characters.pipe.ts', ANGULAR_DIR + 'components/util/truncate-characters.pipe.ts', this, {});
+            this.template(ANGULAR_DIR + 'components/util/_truncate-words.pipe.ts', ANGULAR_DIR + 'components/util/truncate-words.pipe.ts', this, {});
             this.template(ANGULAR_DIR + 'components/util/_date-util.service.ts', ANGULAR_DIR + 'components/util/date-util.service.ts', this, {});
             this.template(ANGULAR_DIR + 'components/util/_data-util.service.ts', ANGULAR_DIR + 'components/util/data-util.service.ts', this, {});
             this.template(ANGULAR_DIR + 'components/util/_pagination-util.service.ts', ANGULAR_DIR + 'components/util/pagination-util.service.ts', this, {});
@@ -538,7 +540,8 @@ module.exports = JhipsterClientGenerator.extend({
         writeAngularProfileServiceFiles: function () {
             // services
             this.template(ANGULAR_DIR + 'components/profiles/_profile.service.ts', ANGULAR_DIR + 'components/profiles/profile.service.ts', this, {});
-            this.template(ANGULAR_DIR + 'components/profiles/_page-ribbon.directive.ts', ANGULAR_DIR + 'components/profiles/page-ribbon.directive.ts', this, {});
+            this.template(ANGULAR_DIR + 'components/profiles/_profile-info.ts', ANGULAR_DIR + 'components/profiles/profile-info.ts', this, {});
+            this.template(ANGULAR_DIR + 'components/profiles/_page-ribbon.component.ts', ANGULAR_DIR + 'components/profiles/page-ribbon.component.ts', this, {});
         },
 
         writeImageFiles: function () {

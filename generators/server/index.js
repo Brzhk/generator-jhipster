@@ -332,6 +332,9 @@ module.exports = JhipsterServerGenerator.extend({
             if (this.configOptions.testFrameworks) {
                 this.testFrameworks = this.configOptions.testFrameworks;
             }
+            if (this.configOptions.angularVersion) {
+                this.angularVersion = this.configOptions.angularVersion;
+            }
         },
 
         composeLanguages: function () {
@@ -875,6 +878,7 @@ module.exports = JhipsterServerGenerator.extend({
     },
 
     end: function () {
+
         if (this.prodDatabaseType === 'oracle') {
             this.log('\n\n');
             this.warning(chalk.yellow.bold('You have selected Oracle database.\n') + 'Please place the ' + chalk.yellow.bold('ojdbc-' + this.ojdbcVersion + '.jar') + ' in the `' + chalk.yellow.bold(this.libFolder) + '` folder under the project root. \n');

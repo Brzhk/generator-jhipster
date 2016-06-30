@@ -1,5 +1,6 @@
-import { UpgradeAdapter } from '@angular/upgrade';
+import { upgradeAdapter } from './upgrade_adapter';
+import { HTTP_PROVIDERS } from '@angular/http';
+import './app.module';
 
-let upgradeAdapter = new UpgradeAdapter();
-
-upgradeAdapter.bootstrap(document.documentElement, ['<%=angularAppName%>.app']);
+upgradeAdapter.addProvider(HTTP_PROVIDERS);
+upgradeAdapter.bootstrap(document.body, ['<%=angularAppName%>.app'], {strictDi: true});

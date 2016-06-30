@@ -1,19 +1,13 @@
-(function() {
-    'use strict';
+import { ITEMS_PER_PAGE } from '../../components/form/pagination.constants';
 
-    angular
-        .module('<%=angularAppName%>.common')
-        .config(paginationConfig);
+PaginationConfig.$inject = ['uibPaginationConfig'];
 
-    paginationConfig.$inject = ['uibPaginationConfig', 'paginationConstants'];
-
-    function paginationConfig(uibPaginationConfig, paginationConstants) {
-        uibPaginationConfig.itemsPerPage = paginationConstants.itemsPerPage;
-        uibPaginationConfig.maxSize = 5;
-        uibPaginationConfig.boundaryLinks = true;
-        uibPaginationConfig.firstText = '«';
-        uibPaginationConfig.previousText = '‹';
-        uibPaginationConfig.nextText = '›';
-        uibPaginationConfig.lastText = '»';
-    }
-})();
+export function PaginationConfig(uibPaginationConfig) {
+    uibPaginationConfig.itemsPerPage = ITEMS_PER_PAGE;
+    uibPaginationConfig.maxSize = 5;
+    uibPaginationConfig.boundaryLinks = true;
+    uibPaginationConfig.firstText = '«';
+    uibPaginationConfig.previousText = '‹';
+    uibPaginationConfig.nextText = '›';
+    uibPaginationConfig.lastText = '»';
+}

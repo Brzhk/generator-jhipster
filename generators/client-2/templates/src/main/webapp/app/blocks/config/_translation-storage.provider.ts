@@ -1,28 +1,22 @@
-(function() {
-    'use strict';
+import {LANGUAGES} from '../../components/language/language.constants';
 
-    angular
-        .module('<%=angularAppName%>.common')
-        .factory('translationStorageProvider', translationStorageProvider);
+TranslationStorageProvider.$inject = ['$cookies', '$log'];
 
-    translationStorageProvider.$inject = ['$cookies', '$log', 'LANGUAGES'];
+export function TranslationStorageProvider($cookies, $log) {
+    return {
+        get: get,
+        put: put
+    };
 
-    function translationStorageProvider($cookies, $log, LANGUAGES) {
-        return {
-            get: get,
-            put: put
-        };
-
-        function get(name) {
-            if (LANGUAGES.indexOf($cookies.getObject(name)) === -1) {
-                $log.info('Resetting invalid cookie language "' + $cookies.getObject(name) + '" to prefered language "<%= nativeLanguage %>"');
-                $cookies.putObject(name, '<%= nativeLanguage %>');
-            }
-            return $cookies.getObject(name);
+    function get(name) {
+        if (LANGUAGES.indexOf($cookies.getObject(name)) === -1) {
+            $log.info('Resetting invalid cookie language "' + $cookies.getObject(name) + '" to prefered language "<%= nativeLanguage %>"');
+            $cookies.putObject(name, '<%= nativeLanguage %>');
         }
-
-        function put(name, value) {
-            $cookies.putObject(name, value);
-        }
+        return $cookies.getObject(name);
     }
-})();
+
+    function put(name, value) {
+        $cookies.putObject(name, value);
+    }
+}

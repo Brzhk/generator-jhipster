@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "target": "es5",
-        "module": "commonjs",
+        "module": "system",
         "moduleResolution": "node",
         "sourceMap": true,
         "emitDecoratorMetadata": true,
@@ -9,12 +9,10 @@
         "removeComments": false,
         "noImplicitAny": false,
         "suppressImplicitAnyIndexErrors": true,
-        "isolatedModules": true
+        "outDir": "<%= DIST_DIR %>app"
     },
     "exclude": [
         "node_modules",
-        "typings/index.d.ts",
-        "typings/main",
-        "typings/globals"
+        "typings/index.d.ts"
     ]
 }

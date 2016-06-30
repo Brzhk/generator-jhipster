@@ -1,14 +1,6 @@
-(function() {
-    'use strict';
+AlertServiceConfig.$inject = ['AlertServiceProvider'];
 
-    angular
-        .module('<%=angularAppName%>.common')
-        .config(alertServiceConfig);
-
-    alertServiceConfig.$inject = ['AlertServiceProvider'];
-
-    function alertServiceConfig(AlertServiceProvider) {
-        // set below to true to make alerts look like toast
-        AlertServiceProvider.showAsToast(false);
-    }
-})();
+export function AlertServiceConfig(AlertServiceProvider) {
+    // set below to true to make alerts look like toast
+    AlertServiceProvider.showAsToast(false);
+}

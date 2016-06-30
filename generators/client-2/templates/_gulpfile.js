@@ -23,10 +23,6 @@ var gulp = require('gulp'),<% if(useSass) { %>
     plumber = require('gulp-plumber'),
     changed = require('gulp-changed'),
     gulpIf = require('gulp-if'),
-    inject = require('gulp-inject'),
-    angularFilesort = require('gulp-angular-filesort'),
-    naturalSort = require('gulp-natural-sort'),
-    bowerFiles = require('main-bower-files'),
     ts = require('gulp-typescript'),
     sourcemaps = require('gulp-sourcemaps'),
     tslint = require('gulp-tslint');
@@ -34,73 +30,37 @@ var gulp = require('gulp'),<% if(useSass) { %>
 var handleErrors = require('./gulp/handleErrors'),
     serve = require('./gulp/serve'),
     util = require('./gulp/utils'),
+    copy = require('./gulp/copy'),
+    inject = require('./gulp/inject'),
     build = require('./gulp/build');
 
-<%_ if(enableTranslation) { _%>
-var yorc = require('./.yo-rc.json')['generator-jhipster'];
-<%_ } _%>
-
 var tsProject = ts.createProject('tsconfig.json');
-
 var config = require('./gulp/config');
 
 gulp.task('clean', function () {
     return del([config.dist], { dot: true });
 });
 
-gulp.task('copy', [<% if(enableTranslation) { %>'copy:i18n', <% } %>'copy:fonts', 'copy:common', 'copy:deps']);
+gulp.task('copy', [<% if(enableTranslation) { %>'copy:i18n', <% } %>'copy:fonts', 'copy:html', 'copy:common', 'copy:deps']);
 <% if(enableTranslation) { /* copy i18n folders only if translation is enabled */ %>
-gulp.task('copy:i18n', function () {
-    return gulp.src(config.app + 'i18n/**')
-        .pipe(plumber({errorHandler: handleErrors}))
-        .pipe(changed(config.dist + 'i18n/'))
-        .pipe(gulp.dest(config.dist + 'i18n/'));
-});
-<% } %>
-gulp.task('copy:fonts', function () {
-    return es.merge(<% if(!useSass) { %>gulp.src(config.bower + 'bootstrap/fonts/*.*')
-        .pipe(plumber({errorHandler: handleErrors}))
-        .pipe(changed(config.dist + 'content/fonts/'))
-        .pipe(rev())
-        .pipe(gulp.dest(config.dist + 'content/fonts/'))
-        .pipe(rev.manifest(config.revManifest, {
-            base: config.dist,
-            merge: true
-        }))
-        .pipe(gulp.dest(config.dist)),<% } %>
-        gulp.src(config.app + 'content/**/*.{woff,woff2,svg,ttf,eot,otf}')
-        .pipe(plumber({errorHandler: handleErrors}))
-        .pipe(changed(config.dist + 'content/fonts/'))
-        .pipe(flatten())
-        .pipe(rev())
-        .pipe(gulp.dest(config.dist + 'content/fonts/'))
-        .pipe(rev.manifest(config.revManifest, {
-            base: config.dist,
-            merge: true
-        }))
-        .pipe(gulp.dest(config.dist))
-    );
-});
+gulp.task('copy:i18n', copy.i18n);
 
-gulp.task('copy:common', function () {
-    return gulp.src([config.app + 'robots.txt', config.app + 'favicon.ico', config.app + '.htaccess'], { dot: true })
+gulp.task('copy:languages', copy.languages);
+<% } %>
+gulp.task('copy:html', copy.html);
+
+gulp.task('copy:fonts', copy.fonts);
+
+gulp.task('copy:common', copy.common);
+
+//copy npm dependencies to vendor folder
+gulp.task('copy:deps', copy.deps);
+
+gulp.task('copy:temp', function () {
+    return gulp.src([config.app + '/**/*', '!' + config.app + '/**/*.ts', '!' + config.sassSrc])
         .pipe(plumber({errorHandler: handleErrors}))
         .pipe(changed(config.dist))
         .pipe(gulp.dest(config.dist));
-});
-
-//copy npm dependencies to vendor folder
-//TODO optimize to copy only required minified files
-gulp.task('copy:deps', function(){
-    return gulp.src([
-        'node_modules/core-js/client/shim.min.js',
-        'node_modules/zone.js/dist/zone.js',
-        'node_modules/reflect-metadata/Reflect.js',
-        'node_modules/systemjs/dist/system.js',
-        'node_modules/@angular/**/*.js',
-        'node_modules/rxjs/**/*.js'
-    ], { base: 'node_modules' })
-    .pipe(gulp.dest(config.app + 'vendor'));
 });
 
 gulp.task('images', function () {
@@ -136,89 +96,29 @@ gulp.task('sass', function () {
 });
 <%_ } _%>
 
-<%_ if(enableTranslation) { _%>
-gulp.task('languages', function () {
-    var locales = yorc.languages.map(function (locale) {
-        return config.bower + 'angular-i18n/angular-locale_' + locale + '.js';
-    });
-    return gulp.src(locales)
-        .pipe(plumber({errorHandler: handleErrors}))
-        .pipe(changed(config.app + 'i18n/'))
-        .pipe(gulp.dest(config.app + 'i18n/'));
-});
-<%_ } _%>
-
 gulp.task('styles', [<% if(useSass) { %>'sass'<% } %>], function () {
     return gulp.src(config.app + 'content/css')
         .pipe(browserSync.reload({stream: true}));
 });
 
-
-gulp.task('inject', ['tscompile','inject:dep', 'inject:app']);
-gulp.task('inject:dep', ['inject:test', 'inject:vendor']);
-
-
-gulp.task('tscompile', ['clean'], function(cb){
+gulp.task('tscompile', function(cb){
      return gulp.src([config.app + 'app/**/*.ts', 'typings/**/*.d.ts'])
         .pipe(sourcemaps.init())
         .pipe(ts(tsProject))
         .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(config.app  + 'app'));
+        .pipe(gulp.dest(config.dist  + 'app'))
+        .pipe(browserSync.reload({stream: true}));
 });
 
-gulp.task('inject:app', function () {
-    return gulp.src(config.app + 'index.html')
-        .pipe(inject(gulp.src(config.app + 'app/**/*.js')
-            .pipe(naturalSort())
-            .pipe(angularFilesort()), {relative: true}))
-        .pipe(gulp.dest(config.app));
-});
+gulp.task('inject', ['tscompile','inject:dep']);
 
-gulp.task('inject:vendor', function () {
-    var stream = gulp.src(config.app + 'index.html')
-        .pipe(plumber({errorHandler: handleErrors}))
-        .pipe(inject(gulp.src(bowerFiles(), {read: false}), {
-            name: 'bower',
-            relative: true
-        }))
-        .pipe(gulp.dest(config.app));
+gulp.task('inject:dep', ['inject:test', 'inject:vendor']);
 
-    return <% if (useSass) { %>es.merge(stream, gulp.src(config.sassVendor)
-        .pipe(plumber({errorHandler: handleErrors}))
-        .pipe(inject(gulp.src(bowerFiles({filter:['**/*.{scss,sass}']}), {read: false}), {
-            name: 'bower',
-            relative: true
-        }))
-        .pipe(gulp.dest(config.scss)));<% } else { %>stream;<% } %>
-});
+gulp.task('inject:vendor', inject.vendor);
 
-gulp.task('inject:test', function () {
-    return gulp.src(config.test + 'karma.conf.js')
-        .pipe(plumber({errorHandler: handleErrors}))
-        .pipe(inject(gulp.src(bowerFiles({includeDev: true, filter: ['**/*.js']}), {read: false}), {
-            starttag: '// bower:js',
-            endtag: '// endbower',
-            transform: function (filepath) {
-                return '\'' + filepath.substring(1, filepath.length) + '\',';
-            }
-        }))
-        .pipe(gulp.dest(config.test));
-});
+gulp.task('inject:test', inject.test);
 
-gulp.task('inject:troubleshoot', function () {
-    /* this task removes the troubleshooting content from index.html*/
-    return gulp.src(config.app + 'index.html')
-        .pipe(plumber({errorHandler: handleErrors}))
-        /* having empty src as we dont have to read any files*/
-        .pipe(inject(gulp.src('', {read: false}), {
-            starttag: '<!-- inject:troubleshoot -->',
-            removeTags: true,
-            transform: function () {
-                return '<!-- Angular views -->';
-            }
-        }))
-        .pipe(gulp.dest(config.app));
-});
+gulp.task('inject:troubleshoot', inject.troubleshoot);
 
 gulp.task('assets:prod', ['images', 'styles', 'html'], build);
 
@@ -322,20 +222,19 @@ gulp.task('watch', function () {
     gulp.watch(<% if(useSass) { %>config.sassSrc<% } else { %>config.app + 'content/css/**/*.css'<% } %>, ['styles']);
     gulp.watch(config.app + 'content/images/**', ['images']);
     gulp.watch(config.app + 'app/**/*.ts', ['tscompile']);
-    gulp.watch(config.app + 'app/**/*.js', ['inject:app']);
-    gulp.watch([config.app + '*.html', config.app + 'app/**', config.app + 'i18n/**']).on('change', browserSync.reload);
+    gulp.watch(config.app + 'app/**/*.html', ['copy:html']);
+    gulp.watch(config.app + 'i18n/**/*.json', ['copy:i18n']);
+    gulp.watch([config.dist + '*.html', config.dist + 'app/**', config.dist + 'i18n/**']).on('change', browserSync.reload);
 });
 
-gulp.task('install', function () {
-    runSequence(['inject:dep', 'ngconstant:dev', 'copy:deps']<% if(useSass) { %>, 'sass'<% } %><% if(enableTranslation) { %>, 'languages'<% } %>, 'tscompile', 'inject:app', 'inject:troubleshoot');
+gulp.task('install', ['clean'], function () {
+    runSequence('copy:temp', ['inject:dep', 'ngconstant:dev', 'copy:deps']<% if(useSass) { %>, 'sass'<% } %><% if(enableTranslation) { %>, 'copy:languages'<% } %>, 'tscompile', 'inject:troubleshoot');
 });
 
-gulp.task('serve', function () {
-    runSequence('install', serve);
-});
+gulp.task('serve', ['install'], serve);
 
 gulp.task('build', ['clean'], function (cb) {
-    runSequence(['copy', 'inject:vendor', 'ngconstant:prod'<% if(enableTranslation) { %>, 'languages'<% } %>], 'tscompile', 'inject:app', 'inject:troubleshoot', 'assets:prod', cb);
+    runSequence(['copy', 'inject:vendor', 'ngconstant:prod'<% if(enableTranslation) { %>, 'copy:languages'<% } %>], 'tscompile', 'inject:troubleshoot', 'assets:prod', cb);
 });
 
 gulp.task('default', ['serve']);

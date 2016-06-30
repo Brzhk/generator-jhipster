@@ -124,21 +124,25 @@ function askForClient() {
 
     var done = this.async();
     var getNumberedQuestion = this.getNumberedQuestion.bind(this);
+    var applicationType = this.applicationType;
 
     this.prompt({
         type: 'list',
         name: 'angularVersion',
+        when: function (response) {
+            return (applicationType !== 'microservice');
+        },
         message: function (response) {
-            return getNumberedQuestion('Which *AngularJS* version would you like to use for the client side?', true);
+            return getNumberedQuestion('Which *Angular* version would you like to use for the client?', applicationType !== 'microservice');
         },
         choices: [
             {
                 value: 'angular1',
-                name: 'I`ll use AngularJS 1 (stable)'
+                name: 'Angular 1.x (stable)'
             },
             {
                 value: 'angular2',
-                name: 'I want to try AngularJS 2 (Please note that this is still in beta)'
+                name: '[BETA] Angular 2.x (rc3)'
             }
         ],
         default: 'angular1'
